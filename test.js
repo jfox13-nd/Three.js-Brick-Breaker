@@ -12,7 +12,7 @@ const paddle_increment = 0.5;
 
 const tile_rows = 2;
 const tile_row_height = 0.5;
-const tiles_per_row = 3;
+const tiles_per_row = 5;
 
 
 function main() {
@@ -87,10 +87,10 @@ function main() {
   const tiles = []
 
     // here is where we would generate tiles
-    var tile_row_space = (board_width-1) / tiles_per_row;
+    var tile_row_space = (board_width) / (tiles_per_row+1);
     for(var row = 0; row < tile_rows; row++ ) {
         for(var tile_index = 0; tile_index < tiles_per_row; tile_index++ ) {
-            tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index) + tile_row_space/2, board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
+            tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
         }
     }
 
