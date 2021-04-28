@@ -1,4 +1,5 @@
-import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r127/build/three.module.js';
+import * as THREE from './node_modules/three/build/three.module.js';
+import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
 var ball_x_speed = 0.1;
 var ball_y_speed = 0.1;
 var paddle_x = 0;
@@ -21,6 +22,8 @@ function main() {
   //renderer.setSize( window.innerWidth, window.innerHeight )
   renderer.setSize( 1000,500 )
 
+  const scene = new THREE.Scene();
+
   const fov = 75;
   const aspect = 2;  // the canvas default
   const near = 0.1;
@@ -28,12 +31,17 @@ function main() {
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.z = 20;
 
+  const controls = new OrbitControls( camera, renderer.domElement );
 
-  const scene = new THREE.Scene();
+  //camera.position.set( 0, 20, 100 );
+  //controls.update();
+
+
+  
 
   {
     const color = 0xFFFFFF;
-    const intensity = 1;
+    const intensity = 2;
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
     scene.add(light);
