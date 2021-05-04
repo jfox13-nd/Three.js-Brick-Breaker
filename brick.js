@@ -152,11 +152,11 @@ var main = function () {
   ];
 
   // Makes objects in the physics simulator in the exact same positions
-  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[0].position));
-  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[1].position));
-  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[2].position));
-  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[3].position));
-  shape_physics.push(initCannonBox(5,paddleWidth,paddleHeight,paddleDepth,shapes[4].position));
+  shape_physics.push(initCannonBox(0,sideWidth/2,sideHeight,sideDepth,shapes[0].position));
+  shape_physics.push(initCannonBox(0,sideWidth/2,sideHeight,sideDepth,shapes[1].position));
+  shape_physics.push(initCannonBox(0,topWidth/2,topHeight/2,topDepth,shapes[2].position));
+  shape_physics.push(initCannonBox(0,topWidth/2,topHeight/2,topDepth,shapes[3].position));
+  shape_physics.push(initCannonBox(5,paddleWidth/2,paddleHeight,paddleDepth,shapes[4].position));
   shape_physics.push(initCannonBall(shapes[5].position));
 
   // Code I haven't figured out to get collisions
@@ -174,7 +174,7 @@ var main = function () {
     for(var row = 0; row < tile_rows; row++ ) {
         for(var tile_index = 0; tile_index < tiles_per_row; tile_index++ ) {
             tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
-            tile_physics.push(initCannonBox(1,brickWidth,brickHeight,brickDepth,tiles[tiles.length-1].position));
+            tile_physics.push(initCannonBox(1,brickWidth/2,brickHeight/2,brickDepth,tiles[tiles.length-1].position));
         }
     }
 
