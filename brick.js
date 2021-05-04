@@ -1,5 +1,7 @@
 import * as THREE from './node_modules/three/build/three.module.js';
 import { OrbitControls } from './node_modules/three/examples/jsm/controls/OrbitControls.js';
+import './cannon.min.js';
+
 var ball_x_speed = 0.1;
 var ball_y_speed = 0.1;
 var paddle_x = 0;
@@ -11,12 +13,72 @@ const ball_rad = 0.5;
 const paddle_location = -8;
 const paddle_increment = 0.5;
 
-const tile_rows = 2;
+const tile_rows = 3;
 const tile_row_height = 0.5;
-const tiles_per_row = 5;
+const tiles_per_row = 2;
 
+let world, ballShape;
+const ballMass = 1;
 
-function main() {
+let paddleBody;
+
+const ball_vel_mag = Math.sqrt( Math.pow(0.1,2) + Math.pow(0.1,2) );
+
+let shape_physics = [];
+let tile_physics = [];
+
+//let testThis = this;
+const global = this;
+
+// setup world physics
+var initCannon = function() {
+
+  world = new CANNON.World();
+  world.gravity.set(0,0,0);
+  world.broadphase = new CANNON.NaiveBroadphase();
+  world.solver.iterations = 10;
+
+}
+
+// setup physicas for the ball
+var initCannonBall = function(position) {
+
+  let ballBody = new CANNON.Body({
+    mass: ballMass,
+    shape: new CANNON.Sphere(0.5),
+    material: new CANNON.Material("bouncy")
+  });
+
+  ballBody.angularVelocity.set(0,0,0);
+  ballBody.linearDamping = 0;
+  ballBody.position.copy(position);
+  ballBody.material.friction = 0;
+  ballBody.material.restitution = 1.0;
+
+  return ballBody;
+  //world.addBody(ballBody);
+}
+
+// setup physics for a rectangle
+var initCannonBox = function(mass, l, w, h, position) {
+
+  let ballBody = new CANNON.Body({
+    mass: mass,
+    shape: new CANNON.Box(new CANNON.Vec3(l,w,h)),
+    material: new CANNON.Material("bouncy")
+  });
+  ballBody.angularVelocity.set(0,0,0);
+  ballBody.linearDamping = 0;
+  ballBody.position.copy(position)
+  ballBody.material.friction = 0;
+  ballBody.material.restitution = 1.0;
+
+  return ballBody;
+  //world.addBody(ballBody);
+}
+
+var main = function () {
+
   const canvas = document.querySelector('#c');
   const renderer = new THREE.WebGLRenderer({canvas});
   //renderer.setSize( window.innerWidth, window.innerHeight )
@@ -33,11 +95,6 @@ function main() {
 
   const controls = new OrbitControls( camera, renderer.domElement );
 
-  //camera.position.set( 0, 20, 100 );
-  //controls.update();
-
-
-  
 
   {
     const color = 0xFFFFFF;
@@ -69,6 +126,7 @@ function main() {
 
   const ballGeo = new THREE.SphereGeometry( ball_rad, 32, 32 );
 
+  initCannon();
 
   function makeInstance(geometry, color, x, y, z) {
     const material = new THREE.MeshPhongMaterial({color});
@@ -83,6 +141,7 @@ function main() {
     return cube;
   }
 
+  // This array holds Three.js shapes
   const shapes = [
     makeInstance(sideGeo, 0x44aa88, -board_width/2, 0, 0),
     makeInstance(sideGeo, 0x44aa88, board_width/2, 0, 0),
@@ -92,58 +151,101 @@ function main() {
     makeInstance(ballGeo, 0x0000FF, 0, paddle_location+1, 0)
   ];
 
+  // Makes objects in the physics simulator in the exact same positions
+  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[0].position));
+  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[1].position));
+  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[2].position));
+  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[3].position));
+  shape_physics.push(initCannonBox(5,paddleWidth,paddleHeight,paddleDepth,shapes[4].position));
+  shape_physics.push(initCannonBall(shapes[5].position));
+
+  // Code I haven't figured out to get collisions
+  //shape_physics[5].addEventListener("collide",function(event){
+  //  console.log(event);
+  //})
+
+  // ball initial speed
+  shape_physics[5].velocity.set(0.1,0.2,0);
+
   const tiles = []
 
-    // here is where we would generate tiles
+    // here is where we would generate tiles and make matching physics objects
     var tile_row_space = (board_width) / (tiles_per_row+1);
     for(var row = 0; row < tile_rows; row++ ) {
         for(var tile_index = 0; tile_index < tiles_per_row; tile_index++ ) {
             tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
+            tile_physics.push(initCannonBox(1,brickWidth,brickHeight,brickDepth,tiles[tiles.length-1].position));
         }
     }
 
+    // Add all the physics objects to the world
+    shape_physics.forEach(element => world.addBody(element))
+    tile_physics.forEach(element => world.addBody(element))
+
+    // Implement controls
     document.addEventListener("keydown", function(event) {
-        if (event.keyCode == 37 && shapes[shapes.length-2].position.x > -board_width/2 + ball_rad + 1) {
-            shapes[shapes.length-2].position.x = shapes[shapes.length-2].position.x - paddle_increment;
+        if(event.keyCode == 65) {
+          shape_physics[4].velocity.set(-0.1,shape_physics[4].velocity.y,shape_physics[4].velocity.z)
         }
-        if (event.keyCode == 39 && shapes[shapes.length-2].position.x < board_width/2 - ball_rad - 1) {
-            shapes[shapes.length-2].position.x = shapes[shapes.length-2].position.x + paddle_increment;
+        if(event.keyCode == 68) {
+          shape_physics[4].velocity.set(0.1,shape_physics[4].velocity.y,shape_physics[4].velocity.z)
         }
+        if(event.keyCode == 87) {
+          shape_physics[4].velocity.set(shape_physics[4].velocity.x,0.1,shape_physics[4].velocity.z)
+        }
+        if(event.keyCode == 83) {
+          shape_physics[4].velocity.set(shape_physics[4].velocity.x,-0.1,shape_physics[4].velocity.z)
+        }
+        if(event.keyCode == 37) {
+          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0.1)
+        }
+        if(event.keyCode == 39) {
+          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,-0.1)
+        }
+    });
+    document.addEventListener("keyup", function(event) {
+      if(event.keyCode == 65) {
+        shape_physics[4].velocity.set(0,shape_physics[4].velocity.y,shape_physics[4].velocity.z)
+      }
+      if(event.keyCode == 68) {
+        shape_physics[4].velocity.set(0,shape_physics[4].velocity.y,shape_physics[4].velocity.z)
+      }
+      if(event.keyCode == 87) {
+        shape_physics[4].velocity.set(shape_physics[4].velocity.x,0,shape_physics[4].velocity.z)
+      }
+      if(event.keyCode == 83) {
+        shape_physics[4].velocity.set(shape_physics[4].velocity.x,0,shape_physics[4].velocity.z)
+      }
+      if(event.keyCode == 37) {
+        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+      }
+      if(event.keyCode == 39) {
+        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+      }
     });
 
   function render(time) {
     time *= 0.001;  // convert time to seconds
-    
-    /*
-    cubes.forEach((cube, ndx) => {
-      const speed = 1 + ndx * .1;
-      //const rot = time * speed;
-      //cube.rotation.x = rot;
-      //cube.rotation.y = rot;
-    });
-    */
-   shapes[shapes.length-1].position.x = shapes[shapes.length-1].position.x + ball_x_speed
-   shapes[shapes.length-1].position.y = shapes[shapes.length-1].position.y + ball_y_speed
+    world.step(0.5)
 
-   var x_pos = shapes[shapes.length-1].position.x;
-   var y_pos = shapes[shapes.length-1].position.y;
-   var paddle_x = shapes[shapes.length-2].position.x;
-   var paddle_y = shapes[shapes.length-2].position.x;
+    // ball position
+    shape_physics[5].velocity.set(shape_physics[5].velocity.x,shape_physics[5].velocity.y,0);
+    shape_physics[5].quaternion.set(0,0,0,0)
+    shapes[shapes.length-1].position.copy(shape_physics[5].position);
+    shapes[shapes.length-1].quaternion.copy(shape_physics[5].quaternion);
 
-    // make sure it's within board bounds
-    if(x_pos > board_width/2 - ball_rad || x_pos < -board_width/2 + ball_rad) {
-        ball_x_speed = - ball_x_speed;
-        shapes[shapes.length-1].position.x = shapes[shapes.length-1].position.x + 2*ball_x_speed
-    }
-    if(y_pos > board_height/2 - ball_rad || y_pos < -board_height/2 + ball_rad) {
-        ball_y_speed = - ball_y_speed;
-        shapes[shapes.length-1].position.y = shapes[shapes.length-1].position.y + 2*ball_y_speed
-    }
+    // paddle position
+    shape_physics[4].angularVelocity.set(0,0,shape_physics[4].angularVelocity.z);
+    shape_physics[4].velocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0);
+    shape_physics[4].quaternion.set(0,0,shape_physics[4].quaternion.z,shape_physics[4].quaternion.w);
+    shapes[shapes.length-2].position.copy(shape_physics[4].position);
+    shapes[shapes.length-2].quaternion.copy(shape_physics[4].quaternion);
 
-    if(x_pos < paddle_x + paddleWidth/2 - ball_rad && x_pos > paddle_x + -paddleWidth/2 + ball_rad
-        && y_pos < paddle_location + paddleHeight/2 + ball_rad && y_pos > paddle_location - paddleHeight/2 - ball_rad) {
-        ball_y_speed = - ball_y_speed;
-        shapes[shapes.length-1].position.y = shapes[shapes.length-1].position.y + 2*ball_y_speed
+
+    // brick positions
+    for(var i = 0; i < tiles.length; i++) {
+      tiles[i].position.copy(tile_physics[i].position);
+      tiles[i].quaternion.copy(tile_physics[i].quaternion);
     }
 
     renderer.render(scene, camera);
