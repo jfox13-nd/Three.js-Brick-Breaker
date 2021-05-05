@@ -91,7 +91,6 @@ var initCannonBall = function(position) {
   ballBody.material.restitution = 1.0;
 
   return ballBody;
-  //world.addBody(ballBody);
 }
 
 // setup physics for a rectangle
@@ -109,9 +108,9 @@ var initCannonBox = function(mass, l, w, h, position) {
   ballBody.material.restitution = 1.0;
 
   return ballBody;
-  //world.addBody(ballBody);
 }
 
+// Make a Three.js object
 function makeInstance(geometry, color, x, y, z) {
   const material = new THREE.MeshPhongMaterial({color});
 
@@ -125,6 +124,7 @@ function makeInstance(geometry, color, x, y, z) {
   return cube;
 }
 
+// Place all the tiles on the board
 var create_tiles = function(rows, columns) {
   var tile_row_space = (board_width) / (columns+1);
   for(var row = 0; row < rows; row++ ) {
@@ -145,6 +145,7 @@ var create_tiles = function(rows, columns) {
   }
 }
 
+// Remove all tiles from board
 var remove_tiles = function() {
   for(var i = 0; i < tiles.length; i++) {
     scene.remove(tiles[i]);
@@ -152,6 +153,7 @@ var remove_tiles = function() {
   }
 }
 
+// Tear down any existing levels and build a new one
 var new_level = function(rows, columns) {
   // reset ball and paddle positions
   shape_physics[5].velocity.set(ball_x_speed,ball_y_speed,0);
@@ -318,8 +320,6 @@ var main = function () {
     }
     // ball position
     shape_physics[5].velocity.set(mag_factor * shape_physics[5].velocity.x, mag_factor * shape_physics[5].velocity.y,0);
-    //console.log(shape_physics[5].velocity)
-    //shape_physics[5].velocity.set(0.4, mag_factor * shape_physics[5].velocity.y,0);
     shape_physics[5].quaternion.set(0,0,0,0);
     shape_physics[5].position.z = 0;
     shapes[shapes.length-1].position.copy(shape_physics[5].position);
@@ -350,10 +350,10 @@ var main = function () {
         tiles[i].material.color.setHex(0x00ff00);
       }
     }
+    // Game lose logic
     if(tiles_removed >= tiles.length) {
       let current_level = level -1;
       alert("Level "+ current_level + " Clear!")
-      //remove_tiles();
       new_level(current_tiles,current_tiles);
     }
 
