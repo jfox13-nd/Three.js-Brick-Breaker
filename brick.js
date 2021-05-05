@@ -315,9 +315,8 @@ var main = function () {
 
     let current_mag = get_magnitude(shape_physics[5].velocity.x,shape_physics[5].velocity.y)
     let mag_factor = 1;
-    if(current_mag < ball_vel_mag) {
       mag_factor = mag_factor = ball_vel_mag / current_mag;
-    }
+
     // ball position
     shape_physics[5].velocity.set(mag_factor * shape_physics[5].velocity.x, mag_factor * shape_physics[5].velocity.y,0);
     shape_physics[5].quaternion.set(0,0,0,0);
