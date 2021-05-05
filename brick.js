@@ -15,10 +15,14 @@ const paddle_increment = 0.5;
 
 const tile_rows = 3;
 const tile_row_height = 0.5;
-const tiles_per_row = 2;
+const tiles_per_row = 3;
 
 let world, ballShape;
 const ballMass = 1;
+
+let world_time_step = 0.5;
+let gaming = true;
+let start_game = false;
 
 let paddleBody;
 
@@ -102,6 +106,9 @@ var main = function () {
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
     scene.add(light);
+    const light2 = new THREE.DirectionalLight(color, intensity);
+    light2.position.set(1, -2, -4);
+    scene.add(light2);
   }
 
   const sideWidth = 1;
@@ -152,11 +159,11 @@ var main = function () {
   ];
 
   // Makes objects in the physics simulator in the exact same positions
-  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[0].position));
-  shape_physics.push(initCannonBox(0,sideWidth,sideHeight,sideDepth,shapes[1].position));
-  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[2].position));
-  shape_physics.push(initCannonBox(0,topWidth,topHeight,topDepth,shapes[3].position));
-  shape_physics.push(initCannonBox(5,paddleWidth,paddleHeight,paddleDepth,shapes[4].position));
+  shape_physics.push(initCannonBox(0,sideWidth/2,sideHeight,sideDepth,shapes[0].position));
+  shape_physics.push(initCannonBox(0,sideWidth/2,sideHeight,sideDepth,shapes[1].position));
+  shape_physics.push(initCannonBox(0,topWidth/2,topHeight/2,topDepth,shapes[2].position));
+  shape_physics.push(initCannonBox(0,topWidth/2,topHeight/2,topDepth,shapes[3].position));
+  shape_physics.push(initCannonBox(5,paddleWidth/2,paddleHeight,paddleDepth,shapes[4].position));
   shape_physics.push(initCannonBall(shapes[5].position));
 
   // Code I haven't figured out to get collisions
@@ -165,7 +172,7 @@ var main = function () {
   //})
 
   // ball initial speed
-  shape_physics[5].velocity.set(0.1,0.2,0);
+  shape_physics[5].velocity.set(0.4,0.8,0);
 
   const tiles = []
 
@@ -174,7 +181,7 @@ var main = function () {
     for(var row = 0; row < tile_rows; row++ ) {
         for(var tile_index = 0; tile_index < tiles_per_row; tile_index++ ) {
             tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
-            tile_physics.push(initCannonBox(1,brickWidth,brickHeight,brickDepth,tiles[tiles.length-1].position));
+            tile_physics.push(initCannonBox(1,brickWidth/2,brickHeight/2,brickDepth,tiles[tiles.length-1].position));
         }
     }
 
@@ -197,10 +204,19 @@ var main = function () {
           shape_physics[4].velocity.set(shape_physics[4].velocity.x,-0.1,shape_physics[4].velocity.z)
         }
         if(event.keyCode == 37) {
-          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0.1)
+          shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0.1)
         }
         if(event.keyCode == 39) {
-          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,-0.1)
+          shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,-0.1)
+        }
+        if(event.keyCode == 38) {
+          shape_physics[4].angularVelocity.set(-0.1,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
+        }
+        if(event.keyCode == 40) {
+          shape_physics[4].angularVelocity.set(0.1,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
+        }
+        if(event.keyCode == 13) {
+          start_game = true;
         }
     });
     document.addEventListener("keyup", function(event) {
@@ -217,35 +233,60 @@ var main = function () {
         shape_physics[4].velocity.set(shape_physics[4].velocity.x,0,shape_physics[4].velocity.z)
       }
       if(event.keyCode == 37) {
-        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+        shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0)
       }
       if(event.keyCode == 39) {
-        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+        shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0)
+      }
+      if(event.keyCode == 38) {
+        shape_physics[4].angularVelocity.set(0,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
+      }
+      if(event.keyCode == 40) {
+        shape_physics[4].angularVelocity.set(0,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
       }
     });
 
   function render(time) {
     time *= 0.001;  // convert time to seconds
-    world.step(0.5)
+    if(gaming && start_game) {
+      world.step(world_time_step);
+    } else {
+      //alert("Failure")
+      if(!gaming) {window.location.href = 'https://youtu.be/dQw4w9WgXcQ?autoplay=1'}
+    }
 
     // ball position
     shape_physics[5].velocity.set(shape_physics[5].velocity.x,shape_physics[5].velocity.y,0);
     shape_physics[5].quaternion.set(0,0,0,0)
     shapes[shapes.length-1].position.copy(shape_physics[5].position);
     shapes[shapes.length-1].quaternion.copy(shape_physics[5].quaternion);
+    if(shapes[shapes.length-1].position.y < paddle_location-1) {
+      gaming = false;
+    }
 
     // paddle position
-    shape_physics[4].angularVelocity.set(0,0,shape_physics[4].angularVelocity.z);
+    // remove the y
+    //shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z);
+    shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,0,shape_physics[4].angularVelocity.z);
     shape_physics[4].velocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0);
-    shape_physics[4].quaternion.set(0,0,shape_physics[4].quaternion.z,shape_physics[4].quaternion.w);
+    shape_physics[4].quaternion.set(shape_physics[4].quaternion.x,0,shape_physics[4].quaternion.z,shape_physics[4].quaternion.w);
     shapes[shapes.length-2].position.copy(shape_physics[4].position);
     shapes[shapes.length-2].quaternion.copy(shape_physics[4].quaternion);
 
-
     // brick positions
+    // tiles_removed could be a boolean, but that didn't seem to work, possibly a hoisting issue
+    let tiles_removed = 0;
     for(var i = 0; i < tiles.length; i++) {
       tiles[i].position.copy(tile_physics[i].position);
       tiles[i].quaternion.copy(tile_physics[i].quaternion);
+      if (tiles[i].position.z > 1 || tiles[i].position.z < -1) {
+        tiles_removed += 1;
+        tiles[i].material.color.setHex(0x00ff00);
+      }
+    }
+    if(tiles_removed >= tiles.length) {
+      alert("win")
+      window.location.href = 'https://youtu.be/dQw4w9WgXcQ?autoplay=1'
     }
 
     renderer.render(scene, camera);
