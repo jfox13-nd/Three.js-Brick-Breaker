@@ -15,10 +15,13 @@ const paddle_increment = 0.5;
 
 const tile_rows = 3;
 const tile_row_height = 0.5;
-const tiles_per_row = 2;
+const tiles_per_row = 3;
 
 let world, ballShape;
 const ballMass = 1;
+
+let world_time_step = 0.5;
+let gaming = true;
 
 let paddleBody;
 
@@ -165,7 +168,7 @@ var main = function () {
   //})
 
   // ball initial speed
-  shape_physics[5].velocity.set(0.1,0.2,0);
+  shape_physics[5].velocity.set(0.4,0.8,0);
 
   const tiles = []
 
@@ -197,10 +200,16 @@ var main = function () {
           shape_physics[4].velocity.set(shape_physics[4].velocity.x,-0.1,shape_physics[4].velocity.z)
         }
         if(event.keyCode == 37) {
-          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0.1)
+          shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0.1)
         }
         if(event.keyCode == 39) {
-          shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,-0.1)
+          shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,-0.1)
+        }
+        if(event.keyCode == 38) {
+          shape_physics[4].angularVelocity.set(-0.1,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
+        }
+        if(event.keyCode == 40) {
+          shape_physics[4].angularVelocity.set(0.1,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
         }
     });
     document.addEventListener("keyup", function(event) {
@@ -217,35 +226,56 @@ var main = function () {
         shape_physics[4].velocity.set(shape_physics[4].velocity.x,0,shape_physics[4].velocity.z)
       }
       if(event.keyCode == 37) {
-        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+        shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0)
       }
       if(event.keyCode == 39) {
-        shape_physics[4].angularVelocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0)
+        shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,0)
+      }
+      if(event.keyCode == 38) {
+        shape_physics[4].angularVelocity.set(0,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
+      }
+      if(event.keyCode == 40) {
+        shape_physics[4].angularVelocity.set(0,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
       }
     });
 
   function render(time) {
     time *= 0.001;  // convert time to seconds
-    world.step(0.5)
+    if(gaming) {
+      world.step(world_time_step);
+    }
 
     // ball position
     shape_physics[5].velocity.set(shape_physics[5].velocity.x,shape_physics[5].velocity.y,0);
     shape_physics[5].quaternion.set(0,0,0,0)
     shapes[shapes.length-1].position.copy(shape_physics[5].position);
     shapes[shapes.length-1].quaternion.copy(shape_physics[5].quaternion);
+    if(shapes[shapes.length-1].position.y < paddle_location-1) {
+      gaming = false;
+    }
 
     // paddle position
-    shape_physics[4].angularVelocity.set(0,0,shape_physics[4].angularVelocity.z);
+    // remove the y
+    //shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z);
+    shape_physics[4].angularVelocity.set(shape_physics[4].angularVelocity.x,0,shape_physics[4].angularVelocity.z);
     shape_physics[4].velocity.set(shape_physics[4].velocity.x,shape_physics[4].velocity.y,0);
-    shape_physics[4].quaternion.set(0,0,shape_physics[4].quaternion.z,shape_physics[4].quaternion.w);
+    shape_physics[4].quaternion.set(shape_physics[4].quaternion.x,0,shape_physics[4].quaternion.z,shape_physics[4].quaternion.w);
     shapes[shapes.length-2].position.copy(shape_physics[4].position);
     shapes[shapes.length-2].quaternion.copy(shape_physics[4].quaternion);
 
-
     // brick positions
+    // tiles_removed could be a boolean, but that didn't seem to work, possibly a hoisting issue
+    let tiles_removed = 0;
     for(var i = 0; i < tiles.length; i++) {
       tiles[i].position.copy(tile_physics[i].position);
       tiles[i].quaternion.copy(tile_physics[i].quaternion);
+      if (tiles[i].position.z > 1 || tiles[i].position.z < -1) {
+        tiles_removed += 1;
+        tiles[i].material.color.setHex(0x00ff00);
+      }
+    }
+    if(tiles_removed >= tiles.length) {
+      alert("win")
     }
 
     renderer.render(scene, camera);
