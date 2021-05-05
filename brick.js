@@ -195,6 +195,10 @@ var remove_tiles = function() {
     scene.remove(tiles[i]);
     world.remove(tile_physics[i]);
   }
+  tile_physics.forEach(element => world.remove(element))
+  tiles.forEach(element => world.remove(element))
+  tiles = []
+  tile_physics = []
 }
 
 // Tear down any existing levels and build a new one
@@ -432,6 +436,8 @@ var main = function () {
         tiles[i].material.color.setHex(0x00ff00);
       }
     }
+    console.log("tiles removed: "+tiles_removed)
+    console.log("tiles length: "+tiles.length)
     // Game lose logic
     if(tiles_removed >= tiles.length) {
       let current_level = level -1;
