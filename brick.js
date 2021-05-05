@@ -290,7 +290,7 @@ var main = function () {
   }
 
   // This array holds Three.js shapes
-  const shapes = [
+  shapes = [
     makeWallInstance(sideGeo, 0x44aa88, -board_width/2, 0, 0),
     makeWallInstance(sideGeo, 0x44aa88, board_width/2, 0, 0),
     makeWallInstance(topGeo, 0x44aa88, 0, board_height/2, 0),
