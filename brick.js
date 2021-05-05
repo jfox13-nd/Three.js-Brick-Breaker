@@ -436,8 +436,7 @@ var main = function () {
         tiles[i].material.color.setHex(0x00ff00);
       }
     }
-    console.log("tiles removed: "+tiles_removed)
-    console.log("tiles length: "+tiles.length)
+
     // Game lose logic
     if(tiles_removed >= tiles.length) {
       let current_level = level -1;
