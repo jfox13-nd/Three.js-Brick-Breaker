@@ -22,6 +22,7 @@ const ballMass = 1;
 
 let world_time_step = 0.5;
 let gaming = true;
+let start_game = false;
 
 let paddleBody;
 
@@ -105,6 +106,9 @@ var main = function () {
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(-1, 2, 4);
     scene.add(light);
+    const light2 = new THREE.DirectionalLight(color, intensity);
+    light2.position.set(1, -2, -4);
+    scene.add(light2);
   }
 
   const sideWidth = 1;
@@ -211,6 +215,9 @@ var main = function () {
         if(event.keyCode == 40) {
           shape_physics[4].angularVelocity.set(0.1,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
         }
+        if(event.keyCode == 13) {
+          start_game = true;
+        }
     });
     document.addEventListener("keyup", function(event) {
       if(event.keyCode == 65) {
@@ -241,8 +248,11 @@ var main = function () {
 
   function render(time) {
     time *= 0.001;  // convert time to seconds
-    if(gaming) {
+    if(gaming && start_game) {
       world.step(world_time_step);
+    } else {
+      //alert("Failure")
+      if(!gaming) {window.location.href = 'https://youtu.be/dQw4w9WgXcQ?autoplay=1'}
     }
 
     // ball position
@@ -276,6 +286,7 @@ var main = function () {
     }
     if(tiles_removed >= tiles.length) {
       alert("win")
+      window.location.href = 'https://youtu.be/dQw4w9WgXcQ?autoplay=1'
     }
 
     renderer.render(scene, camera);
