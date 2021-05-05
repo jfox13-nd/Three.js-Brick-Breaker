@@ -309,6 +309,7 @@ var main = function () {
         level = 1;
         current_tiles = 1;
         new_level(current_tiles,current_tiles);
+        location.reload();
         gaming = true;
       }
     }
