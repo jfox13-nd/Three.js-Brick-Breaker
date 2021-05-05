@@ -109,10 +109,54 @@ var initCannonBox = function(mass, l, w, h, position) {
 
   return ballBody;
 }
+const Textureloader = new THREE.TextureLoader();
 
-// Make a Three.js object
+function makeBrickInstance(geometry, color, x, y, z) {
+  //console.log(typeof color)
+
+
+    const material = new THREE.MeshPhongMaterial({
+      map: Textureloader.load('https://cosmiccharity.org.uk/wp-content/uploads/2017/09/block.php_.png'),
+    });
+
+  //const material = new THREE.MeshPhongMaterial({color});
+  
+
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  cube.position.x = x;
+  cube.position.y = y;
+  cube.position.z = z;
+
+  return cube;
+}
+
+function makeWallInstance(geometry, color, x, y, z) {
+  //console.log(typeof color)
+
+
+    const material = new THREE.MeshStandardMaterial({
+      map: Textureloader.load('https://media.istockphoto.com/photos/walnut-wood-texture-super-long-walnut-planks-texture-background-picture-id1077486660?k=6&m=1077486660&s=170667a&w=0&h=R6uA-E8tnj_gH-EG2jc-gDsgbqJosLBJHfq1Gd-4kVA='),
+    });
+
+  //const material = new THREE.MeshPhongMaterial({color});
+  
+
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  cube.position.x = x;
+  cube.position.y = y;
+  cube.position.z = z;
+
+  return cube;
+}
+
 function makeInstance(geometry, color, x, y, z) {
+
   const material = new THREE.MeshPhongMaterial({color});
+  
 
   const cube = new THREE.Mesh(geometry, material);
   scene.add(cube);
@@ -129,7 +173,7 @@ var create_tiles = function(rows, columns) {
   var tile_row_space = (board_width) / (columns+1);
   for(var row = 0; row < rows; row++ ) {
       for(var tile_index = 0; tile_index < columns; tile_index++ ) {
-          tiles.push(makeInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
+          tiles.push(makeBrickInstance(brickGeo, 0xff0000, -board_width/2 + tile_row_space *(tile_index+1), board_height/2 - 1 - brickHeight - (tile_row_height+1)*row, 0));
           tile_physics.push(initCannonBox(1,brickWidth/2,brickHeight/2,brickDepth,tiles[tiles.length-1].position));
       }
   }
@@ -208,16 +252,52 @@ var main = function () {
     scene.add(light2);
   }  
 
+  
+
+  const Fontloader = new THREE.FontLoader();
+  
+
   initCannon();
 
+
+  
+
+  function textInstance(text){
+    
+    Fontloader.load( 'fonts/helvetiker_regular.typeface.json', function (font) {
+    
+    	var geometry = new THREE.TextGeometry( text, {
+    		font: font,
+    		size: 180,
+    		height: 5,
+    		curveSegments: 12,
+    		bevelEnabled: true,
+    		bevelThickness: 10,
+    		bevelSize: 8,
+    		bevelOffset: 0,
+    		bevelSegments: 5
+    	} );
+      var textMaterial = new THREE.MeshPhongMaterial( 
+        { color: 0x0000ff }
+      );
+    
+      var mesh = new THREE.Mesh( geometry, textMaterial );
+    
+      scene.add(mesh);
+    } );
+
+    
+  }
+
   // This array holds Three.js shapes
-  shapes = [
-    makeInstance(sideGeo, 0x44aa88, -board_width/2, 0, 0),
-    makeInstance(sideGeo, 0x44aa88, board_width/2, 0, 0),
-    makeInstance(topGeo, 0x44aa88, 0, board_height/2, 0),
-    makeInstance(topGeo, 0x44aa88, 0, -board_height/2, 0),
-    makeInstance(paddleGeo, 0xC0C0C0, 0, paddle_location, 0),
-    makeInstance(ballGeo, 0x0000FF, 0, paddle_location+1, 0)
+  const shapes = [
+    makeWallInstance(sideGeo, 0x44aa88, -board_width/2, 0, 0),
+    makeWallInstance(sideGeo, 0x44aa88, board_width/2, 0, 0),
+    makeWallInstance(topGeo, 0x44aa88, 0, board_height/2, 0),
+    makeWallInstance(topGeo, 0x44aa88, 0, -board_height/2, 0),
+    makeBrickInstance(paddleGeo, 0xff0000, 0, paddle_location, 0),
+    makeInstance(ballGeo, 0xEEEBD9, 0, paddle_location+1, 0)
+
   ];
 
   // Makes objects in the physics simulator in the exact same positions
@@ -239,8 +319,10 @@ var main = function () {
   // Add all the physics objects to the world
   shape_physics.forEach(element => world.addBody(element))
 
+
   //create_tiles(tiles_per_row,tile_rows);
   create_tiles(current_tiles,current_tiles);
+
 
   // Implement controls
   document.addEventListener("keydown", function(event) {
@@ -356,6 +438,10 @@ var main = function () {
       alert("Level "+ current_level + " Clear!")
       new_level(current_tiles,current_tiles);
     }
+    
+    textInstance("Win");
+    
+    
 
     renderer.render(scene, camera);
 
