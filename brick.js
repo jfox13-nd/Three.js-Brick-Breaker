@@ -345,7 +345,7 @@ var main = function () {
     for(var i = 0; i < tiles.length; i++) {
       tiles[i].position.copy(tile_physics[i].position);
       tiles[i].quaternion.copy(tile_physics[i].quaternion);
-      if (tiles[i].position.z > 1 || tiles[i].position.z < -1) {
+      if (tiles[i].position.z > 1 || tiles[i].position.z < -1 || tiles[i].position.y < -board_height/2 +2 ) {
         tiles_removed += 1;
         tiles[i].material.color.setHex(0x00ff00);
       }
