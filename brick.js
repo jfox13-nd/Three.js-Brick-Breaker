@@ -160,7 +160,28 @@ function makeBrickInstance(geometry, color, x, y, z) {
 
 
     const material = new THREE.MeshPhongMaterial({
-      map: Textureloader.load('https://cosmiccharity.org.uk/wp-content/uploads/2017/09/block.php_.png'),
+      map: Textureloader.load('./VP_Rysum_08_diffuse_webpreview.jpeg'),
+    });
+
+  //const material = new THREE.MeshPhongMaterial({color});
+  
+
+  const cube = new THREE.Mesh(geometry, material);
+  scene.add(cube);
+
+  cube.position.x = x;
+  cube.position.y = y;
+  cube.position.z = z;
+
+  return cube;
+}
+
+function makePaddleInstance(geometry, color, x, y, z) {
+  //console.log(typeof color)
+
+
+    const material = new THREE.MeshPhongMaterial({
+      map: Textureloader.load('https://previews.123rf.com/images/rakratchada/rakratchada1401/rakratchada140100310/25358311-close-up-old-wooden-purple-wood-texture.jpg'),
     });
 
   //const material = new THREE.MeshPhongMaterial({color});
@@ -320,7 +341,7 @@ var main = function () {
     makeWallInstance(sideGeo, 0x44aa88, board_width/2, 0, 0),
     makeWallInstance(topGeo, 0x44aa88, 0, board_height/2, 0),
     makeWallInstance(topGeo, 0x44aa88, 0, -board_height/2, 0),
-    makeBrickInstance(paddleGeo, 0xff0000, 0, paddle_location, 0),
+    makePaddleInstance(paddleGeo, 0xff0000, 0, paddle_location, 0),
     makeInstance(ballGeo, 0xEEEBD9, 0, paddle_location+1, 0)
 
   ];
