@@ -31,6 +31,7 @@ let paddleBody;
 
 let ball_vel_mag = Math.sqrt( Math.pow(ball_x_speed,2) + Math.pow(ball_y_speed,2) );
 
+let textShapes = [];
 let shapes = [];
 let tiles = [];
 let shape_physics = [];
@@ -138,6 +139,7 @@ const Fontloader = new THREE.FontLoader();
       mesh.position.y = y;
       mesh.position.z = z;
     
+      textShapes.push(mesh)
       scene.add(mesh);
 
       
@@ -148,6 +150,10 @@ const Fontloader = new THREE.FontLoader();
 
 
 const Textureloader = new THREE.TextureLoader();
+
+function removeText() {
+  textShapes.forEach(element => scene.remove(element));
+}
 
 function makeBrickInstance(geometry, color, x, y, z) {
   //console.log(typeof color)
@@ -233,10 +239,10 @@ var remove_tiles = function() {
     scene.remove(tiles[i]);
     world.remove(tile_physics[i]);
   }
-  tile_physics.forEach(element => world.remove(element))
-  tiles.forEach(element => world.remove(element))
-  tiles = []
-  tile_physics = []
+  tile_physics.forEach(element => world.remove(element));
+  tiles.forEach(element => world.remove(element));
+  tiles = [];
+  tile_physics = [];
 }
 
 // Tear down any existing levels and build a new one
@@ -369,8 +375,10 @@ var main = function () {
     if(event.keyCode == 40) {
       shape_physics[4].angularVelocity.set(paddle_speed,shape_physics[4].angularVelocity.y,shape_physics[4].angularVelocity.z)
     }
+    // enter key to start
     if(event.keyCode == 13) {
       start_game = true;
+      removeText();
     }
   });
   document.addEventListener("keyup", function(event) {
