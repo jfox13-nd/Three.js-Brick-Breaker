@@ -109,6 +109,44 @@ var initCannonBox = function(mass, l, w, h, position) {
 
   return ballBody;
 }
+
+const Fontloader = new THREE.FontLoader();
+
+  function textInstance(text, x, y, z){
+    console.log("text");
+    
+    Fontloader.load( 'node_modules/three/examples/fonts/optimer_regular.typeface.json', function (font) {
+    
+    	var geometry = new THREE.TextGeometry( text, {
+    		font: font,
+    		size: 1.2,
+    		height: .1,
+    		curveSegments: 2,
+    		bevelEnabled: true,
+    		bevelThickness: .05,
+    		bevelSize: .1,
+    		bevelOffset: 0,
+    		bevelSegments: 2
+    	} );
+      var textMaterial = new THREE.MeshStandardMaterial( 
+        { color: 0xffffff }
+      );
+    
+      var mesh = new THREE.Mesh( geometry, textMaterial );
+
+      mesh.position.x = x;
+      mesh.position.y = y;
+      mesh.position.z = z;
+    
+      scene.add(mesh);
+
+      
+    } );
+
+    
+  }
+
+
 const Textureloader = new THREE.TextureLoader();
 
 function makeBrickInstance(geometry, color, x, y, z) {
@@ -256,42 +294,19 @@ var main = function () {
     scene.add(light2);
   }  
 
-  
-
-  const Fontloader = new THREE.FontLoader();
-  
 
   initCannon();
-
-
   
 
-  function textInstance(text){
-    
-    Fontloader.load( 'fonts/helvetiker_regular.typeface.json', function (font) {
-    
-    	var geometry = new THREE.TextGeometry( text, {
-    		font: font,
-    		size: 180,
-    		height: 5,
-    		curveSegments: 12,
-    		bevelEnabled: true,
-    		bevelThickness: 10,
-    		bevelSize: 8,
-    		bevelOffset: 0,
-    		bevelSegments: 5
-    	} );
-      var textMaterial = new THREE.MeshPhongMaterial( 
-        { color: 0x0000ff }
-      );
-    
-      var mesh = new THREE.Mesh( geometry, textMaterial );
-    
-      scene.add(mesh);
-    } );
+  textInstance("Rotate Board: Mouse", -6, 9,-3);
+  textInstance("Paddle Directions:", -6, 5,-3);
+  textInstance("AWSD", -6, 3,-3);
+  textInstance("Paddle Rotation:", -6, -1,-3);
+  textInstance("Left Right Arrow", -6, -3,-3);
+  textInstance("Start: Enter", -6, -7,-3);
 
-    
-  }
+
+
 
   // This array holds Three.js shapes
   shapes = [
@@ -444,7 +459,7 @@ var main = function () {
       new_level(current_tiles,current_tiles);
     }
     
-    textInstance("Win");
+    
     
     
 
