@@ -484,7 +484,10 @@ var main = function () {
     // Game lose logic
     if(tiles_removed >= tiles.length) {
       let current_level = level -1;
-      alert("Level "+ current_level + " Clear!")
+      start_game = false;
+      textInstance("Level "+ current_level + " Clear!", -5, 5,-3);
+      textInstance("Press Enter to Continue", -8, 3,-3);
+      //alert("Level "+ current_level + " Clear!")
       new_level(current_tiles,current_tiles);
     }
     
