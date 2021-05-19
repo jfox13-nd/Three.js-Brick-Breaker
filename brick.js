@@ -114,7 +114,6 @@ var initCannonBox = function(mass, l, w, h, position) {
 const Fontloader = new THREE.FontLoader();
 
   function textInstance(text, x, y, z){
-    console.log("text");
     
     Fontloader.load( 'node_modules/three/examples/fonts/optimer_regular.typeface.json', function (font) {
     
@@ -252,6 +251,7 @@ var create_tiles = function(rows, columns) {
     ball_y_speed +=0.1;
     ball_vel_mag = Math.sqrt( Math.pow(ball_x_speed,2) + Math.pow(ball_y_speed,2) )
   }
+  tiles.forEach( element => element.out = false);
 }
 
 // Remove all tiles from board
@@ -354,10 +354,11 @@ var main = function () {
   shape_physics.push(initCannonBox(5,paddleWidth/2,paddleHeight,paddleDepth,shapes[4].position));
   shape_physics.push(initCannonBall(shapes[5].position));
 
-  // Code I haven't figured out to get collisions
-  //shape_physics[5].addEventListener("collide",function(event){
-  //  console.log(event);
-  //})
+  //Code I haven't figured out to get collisions
+  shape_physics[5].addEventListener("collide",function(event){
+    console.log(event);
+    shapes[5].material.color.setHex(Math.random() * 0xffffff);
+  })
 
   // ball initial speed
   shape_physics[5].velocity.set(0.4,0.8,0);
@@ -475,7 +476,8 @@ var main = function () {
     for(var i = 0; i < tiles.length; i++) {
       tiles[i].position.copy(tile_physics[i].position);
       tiles[i].quaternion.copy(tile_physics[i].quaternion);
-      if (tiles[i].position.z > 1 || tiles[i].position.z < -1 || tiles[i].position.y < -board_height/2 +2 ) {
+      if (tiles[i].position.z > 1 || tiles[i].position.z < -1 || tiles[i].position.y < -board_height/2 +2 || tiles[i].out == true ) {
+        tiles[i].out = true;
         tiles_removed += 1;
         tiles[i].material.color.setHex(0x00ff00);
       }
@@ -487,14 +489,9 @@ var main = function () {
       start_game = false;
       textInstance("Level "+ current_level + " Clear!", -5, 5,-3);
       textInstance("Press Enter to Continue", -8, 3,-3);
-      //alert("Level "+ current_level + " Clear!")
       new_level(current_tiles,current_tiles);
     }
     
-    
-    
-    
-
     renderer.render(scene, camera);
 
     requestAnimationFrame(render);
